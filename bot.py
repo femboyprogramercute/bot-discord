@@ -31,4 +31,4 @@ async def darrol_error(ctx, error):
         await ctx.send("❌ No tienes el rol de GATITO JOVEN para usar este comando.")
 
 # PEGA TU TOKEN AQUÍ
-bot.run("MTUzNjg0NDMyNTM1NzM2MzI1MQ.GGNJeq.vrCOzQYWwYMvo9r_JtD2AD0fVZTKXuYhQ4ICdM")
+bot.run(os.getenv("DISCORD_TOKEN"))
