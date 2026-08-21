@@ -32,15 +32,13 @@ async def on_ready():
   print(f"✅ Bot conectado con éxito como {bot.user}")
 
 
+# ==========================================
+# COMANDO PARA DAR ROLES
+# ==========================================
 @bot.command()
-@commands.has_permissions(
-    administrator=True
-)  # Solo administradores o moderadores con permiso
+@commands.has_permissions(administrator=True)
 async def darrol(ctx, miembro: discord.Member, *, rol: discord.Role):
-  """Uso: !darrol @usuario Nombre Del Rol
-
-  Funciona en cualquier servidor y con cualquier nombre de rol.
-  """
+  """Uso: !darrol @usuario Nombre Del Rol"""
   try:
     await miembro.add_roles(rol)
     await ctx.send(f"✅ Se le otorgó el rol **{rol.name}** a {miembro.mention}.")
@@ -59,6 +57,38 @@ async def darrol_error(ctx, error):
     await ctx.send("❌ No tienes permisos de administrador para usar este comando.")
   elif isinstance(error, commands.MissingRequiredArgument):
     await ctx.send("⚠️ Faltan datos. Uso correcto: `!darrol @usuario NombreDelRol`")
+  elif isinstance(error, commands.BadArgument):
+    await ctx.send(
+        "⚠️ No pude encontrar ese rol. Asegúrate de escribirlo bien o mencionar"
+        " el rol."
+    )
+
+
+# ==========================================
+# COMANDO PARA QUITAR ROLES (¡Nuevo!)
+# ==========================================
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def quitarrol(ctx, miembro: discord.Member, *, rol: discord.Role):
+  """Uso: !quitarrol @usuario Nombre Del Rol"""
+  try:
+    await miembro.remove_roles(rol)
+    await ctx.send(f"✅ Se le removió el rol **{rol.name}** a {miembro.mention}.")
+  except discord.Forbidden:
+    await ctx.send(
+        "❌ No tengo permisos suficientes para quitar este rol (asegúrate de"
+        " que mi rol esté por encima de este en la lista)."
+    )
+  except Exception as e:
+    await ctx.send(f"⚠️ Ocurrió un error: {e}")
+
+
+@quitarrol.error
+async def quitarrol_error(ctx, error):
+  if isinstance(error, commands.MissingPermissions):
+    await ctx.send("❌ No tienes permisos de administrador para usar este comando.")
+  elif isinstance(error, commands.MissingRequiredArgument):
+    await ctx.send("⚠️ Faltan datos. Uso correcto: `!quitarrol @usuario NombreDelRol`")
   elif isinstance(error, commands.BadArgument):
     await ctx.send(
         "⚠️ No pude encontrar ese rol. Asegúrate de escribirlo bien o mencionar"
