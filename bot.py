@@ -28,15 +28,14 @@ async def on_ready():
     print(f"✅ Bot conectado con éxito como {bot.user}")
 
 
-# --- FUNCIÓN PARA VALIDAR SI ES MODERADOR (Sin importar el nombre del rol) ---
+# --- FUNCIÓN PARA VALIDAR MODERADORES (No importa el nombre del rol) ---
 def es_moderador():
     async def predicate(ctx):
-        # El creador del servidor siempre puede (por seguridad)
+        # El dueño del servidor siempre tiene acceso
         if ctx.author == ctx.guild.owner:
             return True
         
-        # Revisa si el usuario tiene el permiso de gestionar mensajes o gestionar roles
-        # Puedes cambiar 'manage_messages' por cualquier otro permiso que tenga su rol
+        # Revisa si su rol tiene permisos de gestionar mensajes o roles
         if ctx.author.guild_permissions.manage_messages or ctx.author.guild_permissions.manage_roles:
             return True
             
@@ -85,7 +84,7 @@ async def expulsar(ctx, miembro: discord.Member, *, razon: str = "No se especifi
     """Uso: !expulsar @usuario [razón]"""
     try:
         await miembro.kick(reason=razon)
-        await ctx.send(f"✅ Se ha expulsado a {miembro.mention} del servidor. Razón: {razon}")
+        await ctx.send(f"✅ Se ha expulsado a {miennbro.mention if 'miennbro' in locals() else miembro.mention} del servidor. Razón: {razon}")
     except discord.Forbidden:
         await ctx.send("❌ No tengo permisos suficientes para expulsar a este usuario (mi rol debe estar más arriba).")
     except Exception as e:
