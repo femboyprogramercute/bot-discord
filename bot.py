@@ -28,11 +28,27 @@ async def on_ready():
     print(f"✅ Bot conectado con éxito como {bot.user}")
 
 
+# --- FUNCIÓN PARA VALIDAR SI ES MODERADOR (Sin importar el nombre del rol) ---
+def es_moderador():
+    async def predicate(ctx):
+        # El creador del servidor siempre puede (por seguridad)
+        if ctx.author == ctx.guild.owner:
+            return True
+        
+        # Revisa si el usuario tiene el permiso de gestionar mensajes o gestionar roles
+        # Puedes cambiar 'manage_messages' por cualquier otro permiso que tenga su rol
+        if ctx.author.guild_permissions.manage_messages or ctx.author.guild_permissions.manage_roles:
+            return True
+            
+        raise commands.MissingPermissions(["manage_messages"])
+    return commands.check(predicate)
+
+
 # -----------------------------------------------
 # COMANDO PARA DAR ROLES
 # -----------------------------------------------
 @bot.command()
-@commands.has_role("Moderador")  # <--- CAMBIA "Moderador" por el nombre exacto de tu rol
+@es_moderador()
 async def darrol(ctx, miembro: discord.Member, *, rol: discord.Role):
     """Uso: !darrol @usuario Nombre Del Rol"""
     try:
@@ -48,7 +64,7 @@ async def darrol(ctx, miembro: discord.Member, *, rol: discord.Role):
 # COMANDO PARA QUITAR ROLES
 # -----------------------------------------------
 @bot.command()
-@commands.has_role("Moderador")
+@es_moderador()
 async def quitarrol(ctx, miembro: discord.Member, *, rol: discord.Role):
     """Uso: !quitarrol @usuario Nombre Del Rol"""
     try:
@@ -64,7 +80,7 @@ async def quitarrol(ctx, miembro: discord.Member, *, rol: discord.Role):
 # COMANDO PARA EXPULSAR (KICK)
 # -----------------------------------------------
 @bot.command()
-@commands.has_role("Moderador")
+@es_moderador()
 async def expulsar(ctx, miembro: discord.Member, *, razon: str = "No se especificó una razón"):
     """Uso: !expulsar @usuario [razón]"""
     try:
@@ -80,7 +96,7 @@ async def expulsar(ctx, miembro: discord.Member, *, razon: str = "No se especifi
 # COMANDO PARA BANEAR PERMANENTEMENTE
 # -----------------------------------------------
 @bot.command()
-@commands.has_role("Moderador")
+@es_moderador()
 async def ban(ctx, miembro: discord.Member, *, razon: str = "No se especificó una razón"):
     """Uso: !ban @usuario [razón]"""
     try:
@@ -100,8 +116,8 @@ async def ban(ctx, miembro: discord.Member, *, razon: str = "No se especificó u
 @expulsar.error
 @ban.error
 async def comandos_error(ctx, error):
-    if isinstance(error, commands.MissingRole):
-        await ctx.send("❌ No tienes el rol de moderador necesario para usar este comando.")
+    if isinstance(error, commands.CheckFailure):
+        await ctx.send("❌ No tienes los permisos necesarios para usar este comando.")
     elif isinstance(error, commands.MissingRequiredArgument):
         await ctx.send("⚠️ Faltan datos obligatorios. Revisa cómo usar el comando.")
     elif isinstance(error, commands.BadArgument):
