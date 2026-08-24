@@ -32,7 +32,7 @@ async def on_ready():
 # COMANDO PARA DAR ROLES
 # -----------------------------------------------
 @bot.command()
-@commands.has_permissions(manage_roles=True)
+@commands.has_role("Moderador")  # <--- CAMBIA "Moderador" por el nombre exacto de tu rol
 async def darrol(ctx, miembro: discord.Member, *, rol: discord.Role):
     """Uso: !darrol @usuario Nombre Del Rol"""
     try:
@@ -48,7 +48,7 @@ async def darrol(ctx, miembro: discord.Member, *, rol: discord.Role):
 # COMANDO PARA QUITAR ROLES
 # -----------------------------------------------
 @bot.command()
-@commands.has_permissions(manage_roles=True)
+@commands.has_role("Moderador")
 async def quitarrol(ctx, miembro: discord.Member, *, rol: discord.Role):
     """Uso: !quitarrol @usuario Nombre Del Rol"""
     try:
@@ -64,7 +64,7 @@ async def quitarrol(ctx, miembro: discord.Member, *, rol: discord.Role):
 # COMANDO PARA EXPULSAR (KICK)
 # -----------------------------------------------
 @bot.command()
-@commands.has_permissions(kick_members=True)
+@commands.has_role("Moderador")
 async def expulsar(ctx, miembro: discord.Member, *, razon: str = "No se especificó una razón"):
     """Uso: !expulsar @usuario [razón]"""
     try:
@@ -80,7 +80,7 @@ async def expulsar(ctx, miembro: discord.Member, *, razon: str = "No se especifi
 # COMANDO PARA BANEAR PERMANENTEMENTE
 # -----------------------------------------------
 @bot.command()
-@commands.has_permissions(ban_members=True)
+@commands.has_role("Moderador")
 async def ban(ctx, miembro: discord.Member, *, razon: str = "No se especificó una razón"):
     """Uso: !ban @usuario [razón]"""
     try:
@@ -93,19 +93,19 @@ async def ban(ctx, miembro: discord.Member, *, razon: str = "No se especificó u
 
 
 # -----------------------------------------------
-# MANEJO GENERAL DE ERRORES PARA LOS COMANDOS
+# MANEJO DE ERRORES
 # -----------------------------------------------
 @darrol.error
 @quitarrol.error
 @expulsar.error
 @ban.error
 async def comandos_error(ctx, error):
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send("❌ No tienes los permisos necesarios para usar este comando.")
+    if isinstance(error, commands.MissingRole):
+        await ctx.send("❌ No tienes el rol de moderador necesario para usar este comando.")
     elif isinstance(error, commands.MissingRequiredArgument):
         await ctx.send("⚠️ Faltan datos obligatorios. Revisa cómo usar el comando.")
     elif isinstance(error, commands.BadArgument):
-        await ctx.send("⚠️ No pude encontrar al usuario o rol especificado. Asegúrate de mencionarlo correctamente.")
+        await ctx.send("⚠️ No pude encontrar al usuario o rol especificado.")
 
 
 # Iniciar el bot
