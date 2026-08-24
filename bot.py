@@ -32,69 +32,39 @@ async def on_ready():
 # COMANDO PARA DAR ROLES
 # -----------------------------------------------
 @bot.command()
-@commands.has_permissions(administrator=True)
+@commands.has_permissions(manage_roles=True)
 async def darrol(ctx, miembro: discord.Member, *, rol: discord.Role):
     """Uso: !darrol @usuario Nombre Del Rol"""
     try:
         await miembro.add_roles(rol)
         await ctx.send(f"✅ Se le otorgó el rol **{rol.name}** a {miembro.mention}.")
     except discord.Forbidden:
-        await ctx.send(
-            "❌ No tengo permisos suficientes para asignar este rol (asegúrate de"
-            " que mi rol esté por encima de este en la lista)."
-        )
+        await ctx.send("❌ No tengo permisos suficientes para asignar este rol (asegúrate de que mi rol esté por encima de este en la lista).")
     except Exception as e:
         await ctx.send(f"⚠️ Ocurrió un error: {e}")
-
-@darrol.error
-async def darrol_error(ctx, error):
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send("❌ No tienes permisos de administrador para usar este comando.")
-    elif isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send("⚠️ Faltan datos. Uso correcto: `!darrol @usuario NombreDelRol`")
-    elif isinstance(error, commands.BadArgument):
-        await ctx.send(
-            "⚠️ No pude encontrar ese rol. Asegúrate de escribirlo bien o mencionar"
-            " el rol."
-        )
 
 
 # -----------------------------------------------
 # COMANDO PARA QUITAR ROLES
 # -----------------------------------------------
 @bot.command()
-@commands.has_permissions(administrator=True)
+@commands.has_permissions(manage_roles=True)
 async def quitarrol(ctx, miembro: discord.Member, *, rol: discord.Role):
     """Uso: !quitarrol @usuario Nombre Del Rol"""
     try:
         await miembro.remove_roles(rol)
         await ctx.send(f"✅ Se le removió el rol **{rol.name}** a {miembro.mention}.")
     except discord.Forbidden:
-        await ctx.send(
-            "❌ No tengo permisos suficientes para quitar este rol (asegúrate de"
-            " que mi rol esté por encima de este en la lista)."
-        )
+        await ctx.send("❌ No tengo permisos suficientes para quitar este rol (asegúrate de que mi rol esté por encima de este en la lista).")
     except Exception as e:
         await ctx.send(f"⚠️ Ocurrió un error: {e}")
-
-@quitarrol.error
-async def quitarrol_error(ctx, error):
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send("❌ No tienes permisos de administrador para usar este comando.")
-    elif isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send("⚠️ Faltan datos. Uso correcto: `!quitarrol @usuario NombreDelRol`")
-    elif isinstance(error, commands.BadArgument):
-        await ctx.send(
-            "⚠️ No pude encontrar ese rol. Asegúrate de escribirlo bien o mencionar"
-            " el rol."
-        )
 
 
 # -----------------------------------------------
 # COMANDO PARA EXPULSAR (KICK)
 # -----------------------------------------------
 @bot.command()
-@commands.has_permissions(administrator=True)
+@commands.has_permissions(kick_members=True)
 async def expulsar(ctx, miembro: discord.Member, *, razon: str = "No se especificó una razón"):
     """Uso: !expulsar @usuario [razón]"""
     try:
@@ -105,19 +75,12 @@ async def expulsar(ctx, miembro: discord.Member, *, razon: str = "No se especifi
     except Exception as e:
         await ctx.send(f"⚠️ Ocurrió un error: {e}")
 
-@expulsar.error
-async def expulsar_error(ctx, error):
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send("❌ No tienes permisos de administrador para usar este comando.")
-    elif isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send("⚠️ Faltan datos. Uso correcto: `!expulsar @usuario [razón]`")
-
 
 # -----------------------------------------------
 # COMANDO PARA BANEAR PERMANENTEMENTE
 # -----------------------------------------------
 @bot.command()
-@commands.has_permissions(administrator=True)
+@commands.has_permissions(ban_members=True)
 async def ban(ctx, miembro: discord.Member, *, razon: str = "No se especificó una razón"):
     """Uso: !ban @usuario [razón]"""
     try:
@@ -128,12 +91,21 @@ async def ban(ctx, miembro: discord.Member, *, razon: str = "No se especificó u
     except Exception as e:
         await ctx.send(f"⚠️ Ocurrió un error: {e}")
 
+
+# -----------------------------------------------
+# MANEJO GENERAL DE ERRORES PARA LOS COMANDOS
+# -----------------------------------------------
+@darrol.error
+@quitarrol.error
+@expulsar.error
 @ban.error
-async def ban_error(ctx, error):
+async def comandos_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
-        await ctx.send("❌ No tienes permisos de administrador para usar este comando.")
+        await ctx.send("❌ No tienes los permisos necesarios para usar este comando.")
     elif isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send("⚠️ Faltan datos. Uso correcto: `!ban @usuario [razón]`")
+        await ctx.send("⚠️ Faltan datos obligatorios. Revisa cómo usar el comando.")
+    elif isinstance(error, commands.BadArgument):
+        await ctx.send("⚠️ No pude encontrar al usuario o rol especificado. Asegúrate de mencionarlo correctamente.")
 
 
 # Iniciar el bot
