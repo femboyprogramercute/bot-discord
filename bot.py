@@ -84,11 +84,45 @@ async def expulsar(ctx, miembro: discord.Member, *, razon: str = "No se especifi
     """Uso: !expulsar @usuario [razón]"""
     try:
         await miembro.kick(reason=razon)
-        await ctx.send(f"✅ Se ha expulsado a {miennbro.mention if 'miennbro' in locals() else miembro.mention} del servidor. Razón: {razon}")
+        await ctx.send(f"✅ Se ha expulsado a {miembro.mention} del servidor. Razón: {razon}")
     except discord.Forbidden:
         await ctx.send("❌ No tengo permisos suficientes para expulsar a este usuario (mi rol debe estar más arriba).")
     except Exception as e:
         await ctx.send(f"⚠️ Ocurrió un error: {e}")
+
+
+# -----------------------------------------------
+# COMANDO PARA EXPULSAR MASIVAMENTE A UN ROL
+# -----------------------------------------------
+@bot.command()
+@es_moderador()
+async def expulsarrol(ctx, *, rol: discord.Role):
+    """Uso: !expulsarrol Nombre Del Rol"""
+    
+    if not ctx.guild.me.guild_permissions.kick_members:
+        await ctx.send("❌ No tengo el permiso de **Expulsar miembros** habilitado en el servidor.")
+        return
+
+    if ctx.guild.me.top_role <= rol:
+        await ctx.send("❌ Mi rol debe estar **por encima** del rol que intentas expulsar en la lista de roles del servidor.")
+        return
+
+    contador = 0
+    fallidos = 0
+    
+    await ctx.send(f"⏳ Iniciando expulsión masiva de todos los usuarios con el rol **{rol.name}**... Esto puede tomar un momento.")
+
+    for miembro in rol.members:
+        if miembro == ctx.guild.owner or miembro == ctx.guild.me:
+            continue
+            
+        try:
+            await miembro.kick(reason=f"Expulsión masiva ordenada por {ctx.author}")
+            contador += 1
+        except Exception:
+            fallidos += 1
+
+    await ctx.send(f"✅ Proceso finalizado. Se expulsó correctamente a **{contador}** usuarios con el rol **{rol.name}**." + (f" (Fallidos: {fallidos})" if fallidos > 0 else ""))
 
 
 # -----------------------------------------------
@@ -113,6 +147,7 @@ async def ban(ctx, miembro: discord.Member, *, razon: str = "No se especificó u
 @darrol.error
 @quitarrol.error
 @expulsar.error
+@expulsarrol.error  # <-- Añadido aquí correctamente
 @ban.error
 async def comandos_error(ctx, error):
     if isinstance(error, commands.CheckFailure):
